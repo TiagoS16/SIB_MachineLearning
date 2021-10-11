@@ -68,15 +68,15 @@ class Dataset:
 
     def hasLabel(self):
         """Returns True if the dataset constains labels (a dependent variable)"""
-        pass
+        return self.Y
 
     def getNumFeatures(self):
         """Returns the number of features"""
-        pass
+        return self.X.shape[1]
 
     def getNumClasses(self):
         """Returns the number of label classes or 0 if the dataset has no dependent variable."""
-        pass
+        return len(np.unique(self.Y)) if self.hasLabel() else 0
 
     def writeDataset(self, filename, sep=","):
         """Saves the dataset to a file
