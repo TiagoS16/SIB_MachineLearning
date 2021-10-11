@@ -28,7 +28,8 @@ class StandardScaler:
         ----------
         dataset : A Dataset object to be standardized
         """
-        pass
+        self.mean = np.mean(dataset.X, axis=0)
+        self.var = np.var(dataset.X, axis=0)
 
     def transform(self, dataset, inline=False):
         """
@@ -41,7 +42,13 @@ class StandardScaler:
         -------
         A Dataset object with standardized data.
         """
-        pass
+        Z = (dataset.X - self.mean)*np.sqrt(self.var)
+        if inline is True:
+            dataset.X = Z
+            return dataset
+        else:
+            return Dataset(Z, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
+
 
     def fit_transform(self, dataset, inline=False):
         """
