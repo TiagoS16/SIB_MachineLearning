@@ -42,7 +42,7 @@ class StandardScaler:
         -------
         A Dataset object with standardized data.
         """
-        Z = (dataset.X - self.mean)*np.sqrt(self.var)
+        Z = (dataset.X - self.mean)/np.sqrt(self.var)
         if inline is True:
             dataset.X = Z
             return dataset
