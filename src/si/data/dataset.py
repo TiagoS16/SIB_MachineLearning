@@ -47,7 +47,20 @@ class Dataset:
         :return: [description]
         :rtype: [type]
         """
-        pass
+        if ylabel is not None and ylabel in df.columns:
+            X = df.loc[:, df.columns != ylabel].to_numpy()
+            Y = df.loc[:, ylabel].to_numpy()
+            xnames = df.columns.tolist().remove(ylabel)
+            yname = ylabel
+
+        else:
+            X = df.to_numpy()
+            Y = None
+            xnames = df.columns.tolist()
+            yname = None
+
+        return cls(X, Y, xnames, yname)
+
 
     def __len__(self):
         """Returns the number of data points."""
