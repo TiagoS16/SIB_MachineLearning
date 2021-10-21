@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from si.util.util import label_gen
 
 __all__ = ['Dataset']
@@ -13,8 +14,8 @@ class Dataset:
             raise Exception("Trying to instanciate a DataSet without any data")
         self.X = X
         self.Y = Y
-        self._xnames = xnames if xnames else label_gen(X.shape[1])
-        self._yname = yname if yname else 'Y'
+        self.xnames = xnames if xnames else label_gen(X.shape[1])
+        self.yname = yname if yname else 'Y'
 
     @classmethod
     def from_data(cls, filename, sep=",", labeled=True):
@@ -92,7 +93,10 @@ class Dataset:
 
     def toDataframe(self):
         """ Converts the dataset into a pandas DataFrame"""
-        pass
+        df = pd.DataFrame(self.X, index=self.Y, columns=self.xnames)
+        df.index.name = self.yname
+        return df
+
 
     def getXy(self):
         return self.X, self.Y
@@ -107,14 +111,31 @@ class Dataset:
         :type format: str, optional
         """
 
-        # falta cenas
-        _means = np.mean(fullds, axis=0)
-        _vars = np.var(fullds, axis=0)
-        _maxs = np.max(fullds, axis=0)
-        _mins = np.min(fullds, axis=0)
+        if format not in ["df", "dict"]:
+            raise Exception("Invalid format. Choose between 'df' and 'dict'.")
+
+        if dataset.hasLabel():
+            data = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
+            columns = dataset.xnames[:] + [dataset.yname]
+        else:
+            data = dataset.X
+            columns = dataset.xnames[:]
+
+        _means = np.mean(data, axis=0)
+        _vars = np.var(data, axis=0)
+        _maxs = np.max(data, axis=0)
+        _mins = np.min(data, axis=0)
         stats = {}
-        for i in range(fullds.shape[1]):
+        for i in range(data.shape[1]):
             stat = {"mean": _means[i],
                     "var": _vars[i],
                     "max": _maxs[i],
-                    "min": _mins[i]}
+                    "min": _mins[i]
+                    }
+            stats[columns[i]] = stat
+
+        if format == "dict":
+            return stats
+        else:
+            return pd.DataFrame.from_dict(stats, orient='index')
+

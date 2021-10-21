@@ -1,7 +1,11 @@
 import numpy as np
 import scipy as stats
+from scipy.stats import f_oneway
 from copy import copy
 import warnings
+
+from src.si.data import Dataset
+
 
 class VarianceThreshold:
 
@@ -19,20 +23,72 @@ class VarianceThreshold:
         cond = self._var > self.threshold
         idxs = [i for i in range(len(cond)) if cond[i]]
         X_trans = X[:, idxs]
-        xnames = [dataset._xnames[i] for i in idxs]
+        xnames = [dataset.xnames[i] for i in idxs]
         if inline:
             dataset.X = X_trans
-            dataset._xnames = xnames
+            dataset.xnames = xnames
             return dataset
         else:
             from .dataset import Dataset
-            return Dataset(copy(X_trans))
-            # todo descobrir isto
+            return Dataset(copy(X_trans), copy(dataset.Y), copy(xnames), copy(dataset.yname))
 
-    def fit_transform(self, dataset):
-        # todo acabar isto
-        pass
+    def fit_transform(self, dataset, inline=False):
+        self.fit(dataset)
+        return self.tansform(dataset, inline=inline)
 
-class SelectKBest:
+class selectKBest:
 
-    # todo class SelectKBest (scikitlearn) seleciona as KBest features
+    def __init__(self, score_function, K):
+        available_sf = ["f_classif", "f_regression"]
+
+        if score_function not in available_sf:
+            raise Exception(f"Scoring function not available. Please choose between: {available_sf}.")
+        elif score_function == "f_classif":
+            self.function = f_classif
+        else:
+            self.function = f_regression
+
+        if K <= 0:
+            raise Exception("The K value must be higher than 0.")
+        else:
+            self.k = K
+
+        def fit(self, dataset):
+            self.F_stat, self.pvalue = self.function(dataset)
+
+        def transform(self, dataset, inline=False):
+            X, Xnames = dataset.X, dataset.xnames
+
+            if self.k > X.shape[1]:
+                warnings.warn("The K value provided is greater than the number of features. "
+                              "All features will be selected")
+                self.k = int(X.shape[1])
+
+            sel_feats = np.argsort(self.F_stat)[-self.k:]
+
+            x = X[:, sel_feats]
+            x_names = [Xnames[index] for index in sel_feats]
+
+            if inline:
+                dataset.X = x
+                dataset.xnames = x_names
+                return dataset
+            else:
+                return Dataset(x, copy(dataset.Y), x_names, copy(dataset.yname))
+
+        def fit_transform(self, dataset, inline=False):
+            self.fit(dataset)
+            return self.transform(dataset, inline=inline)
+
+
+def f_classif(dataset):
+    X, y = dataset.getXy()
+    args = []
+    for k in np.unique(y):
+        args.append(X[y == k, :])
+    F_stat, pvalue = f_oneway(*args)
+    return F_stat, pvalue
+
+def f_regression(dataset):
+    # todo this function
+    pass
