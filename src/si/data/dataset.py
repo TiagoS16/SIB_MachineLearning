@@ -102,40 +102,40 @@ class Dataset:
         return self.X, self.Y
 
 
-    def summary(dataset, format='df'):
-        """ Returns the statistics of a dataset(mean, std, max, min)
+def summary(dataset, format='df'):
+    """ Returns the statistics of a dataset(mean, std, max, min)
 
-        :param dataset: A Dataset object
-        :type dataset: si.data.Dataset
-        :param format: Output format ('df':DataFrame, 'dict':dictionary ), defaults to 'df'
-        :type format: str, optional
-        """
+    :param dataset: A Dataset object
+    :type dataset: si.data.Dataset
+    :param format: Output format ('df':DataFrame, 'dict':dictionary ), defaults to 'df'
+    :type format: str, optional
+    """
 
-        if format not in ["df", "dict"]:
-            raise Exception("Invalid format. Choose between 'df' and 'dict'.")
+    if format not in ["df", "dict"]:
+        raise Exception("Invalid format. Choose between 'df' and 'dict'.")
 
-        if dataset.hasLabel():
-            data = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
-            columns = dataset.xnames[:] + [dataset.yname]
-        else:
-            data = dataset.X
-            columns = dataset.xnames[:]
+    if dataset.hasLabel():
+        data = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
+        columns = dataset.xnames[:] + [dataset.yname]
+    else:
+        data = dataset.X
+        columns = dataset.xnames[:]
 
-        _means = np.mean(data, axis=0)
-        _vars = np.var(data, axis=0)
-        _maxs = np.max(data, axis=0)
-        _mins = np.min(data, axis=0)
-        stats = {}
-        for i in range(data.shape[1]):
-            stat = {"mean": _means[i],
-                    "var": _vars[i],
-                    "max": _maxs[i],
-                    "min": _mins[i]
-                    }
-            stats[columns[i]] = stat
+    _means = np.mean(data, axis=0)
+    _vars = np.var(data, axis=0)
+    _maxs = np.max(data, axis=0)
+    _mins = np.min(data, axis=0)
+    stats = {}
+    for i in range(data.shape[1]):
+        stat = {"mean": _means[i],
+                "var": _vars[i],
+                "max": _maxs[i],
+                "min": _mins[i]
+                }
+        stats[columns[i]] = stat
 
-        if format == "dict":
-            return stats
-        else:
-            return pd.DataFrame.from_dict(stats, orient='index')
+    if format == "dict":
+        return stats
+    else:
+        return pd.DataFrame.from_dict(stats, orient='index')
 
