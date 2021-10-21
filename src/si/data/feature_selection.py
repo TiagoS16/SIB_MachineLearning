@@ -53,32 +53,32 @@ class selectKBest:
         else:
             self.k = K
 
-        def fit(self, dataset):
-            self.F_stat, self.pvalue = self.function(dataset)
+    def fit(self, dataset):
+        self.F_stat, self.pvalue = self.function(dataset)
 
-        def transform(self, dataset, inline=False):
-            X, Xnames = dataset.X, dataset.xnames
+    def transform(self, dataset, inline=False):
+        X, Xnames = dataset.X, dataset.xnames
 
-            if self.k > X.shape[1]:
-                warnings.warn("The K value provided is greater than the number of features. "
-                              "All features will be selected")
-                self.k = int(X.shape[1])
+        if self.k > X.shape[1]:
+            warnings.warn("The K value provided is greater than the number of features. "
+                          "All features will be selected")
+            self.k = int(X.shape[1])
 
-            sel_feats = np.argsort(self.F_stat)[-self.k:]
+        sel_feats = np.argsort(self.F_stat)[-self.k:]
 
-            x = X[:, sel_feats]
-            x_names = [Xnames[index] for index in sel_feats]
+        x = X[:, sel_feats]
+        x_names = [Xnames[index] for index in sel_feats]
 
-            if inline:
-                dataset.X = x
-                dataset.xnames = x_names
-                return dataset
-            else:
-                return Dataset(x, copy(dataset.Y), x_names, copy(dataset.yname))
+        if inline:
+            dataset.X = x
+            dataset.xnames = x_names
+            return dataset
+        else:
+            return Dataset(x, copy(dataset.Y), x_names, copy(dataset.yname))
 
-        def fit_transform(self, dataset, inline=False):
-            self.fit(dataset)
-            return self.transform(dataset, inline=inline)
+    def fit_transform(self, dataset, inline=False):
+        self.fit(dataset)
+        return self.transform(dataset, inline=inline)
 
 
 def f_classif(dataset):
