@@ -78,9 +78,9 @@ class StandardScaler:
         -------
         Dataset object
         """
-        z = dataset.X / np.sqrt(self.var) + self.mean
+        Z = dataset.X / np.sqrt(self.var) + self.mean
         if inline:
-            dataset.X = z
-            return z
+            dataset.X = Z
+            return Z
         else:
-            return Dataset(z, copy(dataset.Y), copy(dataset.xnames), copy(dataset.yname))
+            return Dataset(Z, copy(dataset.Y), copy(dataset.xnames), copy(dataset.yname))

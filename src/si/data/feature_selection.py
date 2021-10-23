@@ -16,7 +16,7 @@ class VarianceThreshold:
 
     def fit(self, dataset):
         X = dataset.X
-        self._var = np.var(X, axis=0)
+        self._var = np.var(X, axis=0)  # axis=0 because columns
 
     def tansform(self, dataset, inline=False):
         X = dataset.X
@@ -29,7 +29,6 @@ class VarianceThreshold:
             dataset.xnames = xnames
             return dataset
         else:
-            from .dataset import Dataset
             return Dataset(copy(X_trans), copy(dataset.Y), copy(xnames), copy(dataset.yname))
 
     def fit_transform(self, dataset, inline=False):
@@ -86,9 +85,14 @@ def f_classif(dataset):
     args = []
     for k in np.unique(y):
         args.append(X[y == k, :])
-    F_stat, pvalue = f_oneway(*args)
+    F_stat, pvalue = f_oneway(*args )
     return F_stat, pvalue
 
 def f_regression(dataset):
-    # todo this function
-    pass
+    X, y = dataset.getXy()
+    cor_coef = np.array([stats.pearsonr(X[:, i], y)[0] for i in range(X.shape[1])])
+    dof = y.size - 2  # degrees of freedom
+    cor_coef_sqrd = cor_coef ** 2
+    F = cor_coef_sqrd / (1 - cor_coef_sqrd) * dof
+    p = stats.f.sf(F, 1, dof)
+    return F, p

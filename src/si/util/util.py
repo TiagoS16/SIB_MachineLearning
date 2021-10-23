@@ -5,7 +5,7 @@ import pandas as pd
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'summary']
+__all__ = ['label_gen']  # , 'summary'
 
 
 def label_gen(n):

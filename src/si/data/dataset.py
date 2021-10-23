@@ -11,7 +11,7 @@ class Dataset:
                  yname: str = None):
         """ Tabular Dataset"""
         if X is None:
-            raise Exception("Trying to instanciate a DataSet without any data")
+            raise Exception("Trying to instanciate a Dataset without any data")
         self.X = X
         self.Y = Y
         self.xnames = xnames if xnames else label_gen(X.shape[1])
@@ -96,7 +96,6 @@ class Dataset:
         df = pd.DataFrame(self.X, index=self.Y, columns=self.xnames)
         df.index.name = self.yname
         return df
-
 
     def getXy(self):
         return self.X, self.Y
