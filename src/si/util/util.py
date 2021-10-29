@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import pandas as pd
+from itertools import cycle
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
@@ -28,6 +29,12 @@ def label_gen(n):
 
 def euclidean(x, y):
     dist = (y - x) ** 2  # x is single point; y is various points
-    dist = np.sum(dist, axis=1)
+    dist = np.sum(dist)
     dist = np.sqrt(dist)
+    return dist
+
+
+def manhattan(x, y):
+    dist = np.abs(x - y)
+    dist = np.sum(dist)
     return dist

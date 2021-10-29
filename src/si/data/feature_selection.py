@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as stats
+import scipy.stats as stats
 from scipy.stats import f_oneway
 from copy import copy
 import warnings
@@ -85,7 +85,7 @@ def f_classif(dataset):
     args = []
     for k in np.unique(y):
         args.append(X[y == k, :])
-    F_stat, pvalue = f_oneway(*args )
+    F_stat, pvalue = f_oneway(*args)
     return F_stat, pvalue
 
 def f_regression(dataset):

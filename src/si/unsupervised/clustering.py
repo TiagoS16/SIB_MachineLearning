@@ -1,33 +1,76 @@
+import warnings
 import numpy as np
 import scipy as stats
-from sklearn.pre
+from sklearn.preprocessing import StandardScaler
 
 from src.si.data import Dataset
-from src.util.util import euclidean
+from src.si.util.util import euclidean, manhattan
+
 
 class PCA:
-    def __init__(self, n_components=2, using="svd"):
+    def __init__(self, n_components=2, method="svd"):
         self.n_components = n_components
-        self.using = using
+
+        available_methods = ["svd", "evd"]
+        if method not in available_methods:
+            raise Exception(f"Method not available. Please choose between: {available_methods}.")
+        self.method = method
 
     def fit(self, dataset):
         pass
 
     def transform(self, dataset):
         x = dataset.X
-        n, p = x.shape
 
-        scale =
+        scale = StandardScaler().fit_transform(x)
+        features = scale.x.T
 
+        if self.method == "svd":
+            self.vecs, self.vals, rv = np.linalg.svd(features)
+        else:
+            cov_matrix = np.cov(features)
+            self.vals, self.vecs = np.linalg.eig(cov_matrix)
+
+        self.sorted_idx = np.argsort(self.vals)[::-1]  # indices ordenados das componentes
+        self.sorted_e_value = self.vals[self.sorted_idx]  # ordenar os valores
+        self.sorted_e_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores
+
+        if self.n_components > 0:
+            if self.n_components > x.shape[1]:
+                warnings.warn("The number of components is larger than the number of features.")
+                self.n_components = x.shape[1]
+            self.components_vector = self.sorted_e_vectors[:, 0:self.n_components]  # vetores correspondentes ao numero de componentes selecionados
+        else:
+            warnings.warn("The number of components is lower than 0.")
+            self.n_components = 1
+            self.components_vector = self.sorted_e_vectors[:, 0:self.n_components]
+
+        x_red = np.dot(self.components_vector.transpose(), features).transpose()
+        return x_red
+
+    def fit_transform(self, dataset):
+        x_red = self.transform(dataset)
+        components_sum, components_values = self.explained_variances()
+        return x_red, components_sum, components_values
+
+    def explained_variances(self):
+        self.components_values = self.sorted_e_value[:, 0:self.n_components]
+        return np.sum(self.components_values), self.components_values
 
 
 class KMeans:
-
-    def __init__(self, k, n_iter=100):
+    def __init__(self, k, distance, n_iter=100):
+        dist = ["euclidean", "manhattan"]
         self.k = k
         self.iter = n_iter
         self.centroids = None
-        self.distance = euclidean  # func no script util.py
+
+        if distance not in dist:
+            raise Exception(f"Distance selected is not present on the list of available functions: {dist}")
+        elif distance is "euclidean":
+            self.distance = euclidean  # func no script util.py
+        else:
+            self.distance = manhattan
 
     def fit(self, dataset):
         x = dataset.X
