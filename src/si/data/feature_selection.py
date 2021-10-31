@@ -35,8 +35,8 @@ class VarianceThreshold:
         self.fit(dataset)
         return self.tansform(dataset, inline=inline)
 
-class selectKBest:
 
+class SelectKBest:
     def __init__(self, score_function, K):
         available_sf = ["f_classif", "f_regression"]
 
@@ -59,13 +59,13 @@ class selectKBest:
         X, Xnames = dataset.X, dataset.xnames
 
         if self.k > X.shape[1]:
-            warnings.warn("The K value provided is greater than the number of features. "
-                          "All features will be selected")
+            warnings.warn("The K value provided is greater than the number of features."
+                          f"All {X.shape[1]} features will be selected")
             self.k = int(X.shape[1])
 
-        sel_feats = np.argsort(self.F_stat)[-self.k:]
+        sel_feats = np.argsort(self.F_stat)[-self.k:]  # lista de features selecionadas
 
-        x = X[:, sel_feats]
+        x = X[:, sel_feats]  # dados correspondentes as features selecionadas
         x_names = [Xnames[index] for index in sel_feats]
 
         if inline:
@@ -87,6 +87,7 @@ def f_classif(dataset):
         args.append(X[y == k, :])
     F_stat, pvalue = f_oneway(*args)
     return F_stat, pvalue
+
 
 def f_regression(dataset):
     X, y = dataset.getXy()

@@ -1,12 +1,11 @@
 import itertools
 import numpy as np
 import pandas as pd
-from itertools import cycle
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen']  # , 'summary'
+__all__ = ['label_gen', 'euclidean', 'manhattan']
 
 
 def label_gen(n):

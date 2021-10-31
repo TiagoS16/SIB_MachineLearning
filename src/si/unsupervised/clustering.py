@@ -22,8 +22,8 @@ class PCA:
     def transform(self, dataset):
         x = dataset.X
 
-        scale = StandardScaler().fit_transform(x)
-        features = scale.x.T
+        x_scaled = StandardScaler().fit_transform(x)  # normalizar os dados
+        features = x_scaled.T
 
         if self.method == "svd":
             self.vecs, self.vals, rv = np.linalg.svd(features)
@@ -31,9 +31,9 @@ class PCA:
             cov_matrix = np.cov(features)
             self.vals, self.vecs = np.linalg.eig(cov_matrix)
 
-        self.sorted_idx = np.argsort(self.vals)[::-1]  # indices ordenados das componentes
-        self.sorted_e_value = self.vals[self.sorted_idx]  # ordenar os valores
-        self.sorted_e_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores
+        self.sorted_idx = np.argsort(self.vals)[::-1]  # indices ordenados por importancia das componentes
+        self.sorted_e_value = self.vals[self.sorted_idx]  # ordenar os valores pelos indices das colunas
+        self.sorted_e_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores pelos indices das colunas
 
         if self.n_components > 0:
             if self.n_components > x.shape[1]:
@@ -54,7 +54,7 @@ class PCA:
         return x_red, components_sum, components_values
 
     def explained_variances(self):
-        self.components_values = self.sorted_e_value[:, 0:self.n_components]
+        self.components_values = self.sorted_e_value[0:self.n_components] / np.sum(self.sorted_e_value)
         return np.sum(self.components_values), self.components_values
 
 
@@ -97,10 +97,10 @@ class KMeans:
         while changed or count < self.iter:
             idxs = np.apply_along_axis(self.get_closest_centroid, axis=0, arr=x.T)
 
-            cent = []
+            centroids = []
             for i in range(self.k):
-                cent.append(np.mean(x[idxs == i], axis=0))
-            self.centroids = np.array(cent)
+                centroids.append(np.mean(x[idxs == i], axis=0))
+            self.centroids = np.array(centroids)
 
             changed = np.all(old_idxs == idxs)
             old_idxs = idxs
