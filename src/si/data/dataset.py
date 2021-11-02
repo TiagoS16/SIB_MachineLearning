@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from si.util.util import label_gen
 
-__all__ = ['Dataset']
+__all__ = ['Dataset', 'summary']
 
 
 class Dataset:
@@ -93,8 +93,11 @@ class Dataset:
 
     def toDataframe(self):
         """ Converts the dataset into a pandas DataFrame"""
-        df = pd.DataFrame(self.X, index=self.Y, columns=self.xnames)
-        df.index.name = self.yname
+        if self.hasLabel():
+            df = pd.DataFrame(np.hstack((self.X, self.Y.reshape(len(self.Y), 1))),
+                              columns=np.hstack((self.xnames, self.yname)))
+        else:
+            df = pd.DataFrame(self.X.copy(), columns=self.xnames[:])
         return df
 
     def getXy(self):
@@ -114,27 +117,42 @@ def summary(dataset, format='df'):
         raise Exception("Invalid format. Choose between 'df' and 'dict'.")
 
     if dataset.hasLabel():
-        data = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
+        # data = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
+        data = np.hstack((dataset.X, dataset.Y.reshape(len(dataset.Y), 1)))
         columns = dataset.xnames[:] + [dataset.yname]
     else:
         data = dataset.X
         columns = dataset.xnames[:]
 
-    _means = np.mean(data, axis=0)
-    _vars = np.var(data, axis=0)
-    _maxs = np.max(data, axis=0)
-    _mins = np.min(data, axis=0)
+    # _means = np.mean(data, axis=0)
+    # _vars = np.var(data, axis=0)
+    # _maxs = np.max(data, axis=0)
+    # _mins = np.min(data, axis=0)
+    # stats = {}
+    # for i in range(data.shape[1]):
+    #     stat = {"mean": _means[i],
+    #             "var": _vars[i],
+    #             "max": _maxs[i],
+    #             "min": _mins[i]
+    #             }
+    #     stats[columns[i]] = stat
+
     stats = {}
     for i in range(data.shape[1]):
-        stat = {"mean": _means[i],
-                "var": _vars[i],
-                "max": _maxs[i],
-                "min": _mins[i]
+        _means = np.mean(data[:, i], axis=0)
+        _vars = np.var(data[:, i], axis=0)
+        _maxs = np.max(data[:, i], axis=0)
+        _mins = np.min(data[:, i], axis=0)
+
+        stat = {"mean": _means,
+                "var": _vars,
+                "max": _maxs,
+                "min": _mins
                 }
         stats[columns[i]] = stat
 
     if format == "dict":
         return stats
     else:
-        return pd.DataFrame.from_dict(stats, orient='index')
+        return pd.DataFrame(stats)
 

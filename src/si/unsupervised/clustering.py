@@ -1,10 +1,10 @@
 import warnings
 import numpy as np
 import scipy as stats
-from sklearn.preprocessing import StandardScaler
 
 from src.si.data import Dataset
 from src.si.util.util import euclidean, manhattan
+from src.si.util.scale import StandardScaler
 
 
 class PCA:
@@ -20,10 +20,8 @@ class PCA:
         pass
 
     def transform(self, dataset):
-        x = dataset.X
-
-        x_scaled = StandardScaler().fit_transform(x)  # normalizar os dados
-        features = x_scaled.T
+        x_scaled = StandardScaler().fit_transform(dataset)  # normalizar os dados
+        features = x_scaled.X.T
 
         if self.method == "svd":
             self.vecs, self.vals, rv = np.linalg.svd(features)
@@ -36,9 +34,9 @@ class PCA:
         self.sorted_e_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores pelos indices das colunas
 
         if self.n_components > 0:
-            if self.n_components > x.shape[1]:
+            if self.n_components > dataset.X.shape[1]:
                 warnings.warn("The number of components is larger than the number of features.")
-                self.n_components = x.shape[1]
+                self.n_components = dataset.X.shape[1]
             self.components_vector = self.sorted_e_vectors[:, 0:self.n_components]  # vetores correspondentes ao numero de componentes selecionados
         else:
             warnings.warn("The number of components is lower than 0.")
@@ -54,12 +52,12 @@ class PCA:
         return x_red, components_sum, components_values
 
     def explained_variances(self):
-        self.components_values = self.sorted_e_value[0:self.n_components] / np.sum(self.sorted_e_value)
-        return np.sum(self.components_values), self.components_values
+        self.components_values = self.sorted_e_value[0:self.n_components]
+        return np.sum(self.components_values), self.sorted_e_value
 
 
 class KMeans:
-    def __init__(self, k, distance, n_iter=100):
+    def __init__(self, k, distance="euclidean", n_iter=100):
         dist = ["euclidean", "manhattan"]
         self.k = k
         self.iter = n_iter
@@ -89,7 +87,6 @@ class KMeans:
 
     def transform(self, dataset):
         self.init_centroids(dataset)
-        print(self.centroids)
         x = dataset.X
         changed = True
         count = 0

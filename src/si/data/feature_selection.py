@@ -37,7 +37,7 @@ class VarianceThreshold:
 
 
 class SelectKBest:
-    def __init__(self, score_function, K):
+    def __init__(self, k, score_function="f_regression"):
         available_sf = ["f_classif", "f_regression"]
 
         if score_function not in available_sf:
@@ -47,10 +47,10 @@ class SelectKBest:
         else:
             self.function = f_regression
 
-        if K <= 0:
+        if k <= 0:
             raise Exception("The K value must be higher than 0.")
         else:
-            self.k = K
+            self.k = k
 
     def fit(self, dataset):
         self.F_stat, self.pvalue = self.function(dataset)
