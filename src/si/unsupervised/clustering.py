@@ -65,7 +65,7 @@ class KMeans:
 
         if distance not in dist:
             raise Exception(f"Distance selected is not present on the list of available functions: {dist}")
-        elif distance is "euclidean":
+        elif distance == "euclidean":
             self.distance = euclidean  # func no script util.py
         else:
             self.distance = manhattan
@@ -77,8 +77,10 @@ class KMeans:
 
     def init_centroids(self, dataset):
         x = dataset.X
-        self.centroids = np.array([np.random.uniform(low=self._min[i], high=self._max[i], size=(self.k,))
-                                   for i in range(x.shape[1])]).T
+        # self.centroids = np.array([np.random.uniform(low=self._min[i], high=self._max[i], size=(self.k,))
+        #                            for i in range(x.shape[1])]).T
+        rng = np.random.default_rng()
+        self.centroids = rng.choice(x, size=(self.k), replace=False, p=None, axis=0)
 
     def get_closest_centroid(self, x):
         dist = self.distance(x, self.centroids)
@@ -88,10 +90,10 @@ class KMeans:
     def transform(self, dataset):
         self.init_centroids(dataset)
         x = dataset.X
-        changed = True
+        changed = False
         count = 0
         old_idxs = np.zeros(x.shape[0])
-        while changed or count < self.iter:
+        while count < self.iter and not changed:
             idxs = np.apply_along_axis(self.get_closest_centroid, axis=0, arr=x.T)
 
             centroids = []
@@ -100,6 +102,7 @@ class KMeans:
             self.centroids = np.array(centroids)
 
             changed = np.all(old_idxs == idxs)
+            # changed = np.array_equal(old_idxs, idxs)
             old_idxs = idxs
 
             count += 1

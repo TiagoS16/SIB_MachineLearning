@@ -27,9 +27,7 @@ def label_gen(n):
 
 
 def euclidean(x, y):
-    dist = (y - x) ** 2  # x is single point; y is various points
-    dist = np.sum(dist)
-    dist = np.sqrt(dist)
+    dist = np.sqrt(np.sum((x - y)**2, axis=1))  # x is single point; y is various points
     return dist
 
 
