@@ -11,6 +11,7 @@ DIR = os.path.dirname(os.path.realpath('.'))
 filename = os.path.join(DIR, 'datasets/breast-bin.data')
 
 # Labeled dataset
+print("Labeled dataset")
 
 dataset = Dataset.from_data(filename, labeled=True)
 
@@ -26,6 +27,7 @@ print(summary(dataset))
 dataset.toDataframe()
 
 # Standard Scaler
+print("Standard Scaler")
 
 sc = StandardScaler()
 ds2 = sc.fit_transform(dataset)
@@ -34,14 +36,15 @@ print(summary(ds2))
 # Feature Selection
 
 # Variance Threshold
+print('Variance Threshold')
 
 vt = VarianceThreshold(8)
 ds2 = vt.fit_transform(dataset)
 print(summary(ds2))
 
 # SelectKBest
+print('SelectKBest')
 
-# SelectKBest for classification
 skb = SelectKBest(5)
 ds3 = skb.fit_transform(dataset)
 print(summary(ds3))
@@ -62,6 +65,8 @@ plt.ylabel(iris.xnames[c2])
 plt.show()
 
 # KMeans
+print('KMeans')
+
 kmeans = KMeans(3)
 cent, clust = kmeans.fit_transform(iris)
 
@@ -72,6 +77,7 @@ plt.ylabel(iris.xnames[c2])
 plt.show()
 
 # PCA
+print('PCA')
 
 pca = PCA(2, method='svd')
 
