@@ -69,6 +69,7 @@ print('KMeans')
 
 kmeans = KMeans(3)
 cent, clust = kmeans.fit_transform(iris)
+print(cent)
 
 plt.scatter(iris.X[:, c1], iris.X[:, c2], c=clust)
 plt.scatter(cent[:, c1], cent[:, c2], s=100, c='black', marker='x')

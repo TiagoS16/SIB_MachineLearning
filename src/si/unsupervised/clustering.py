@@ -30,30 +30,33 @@ class PCA:
             self.vals, self.vecs = np.linalg.eig(cov_matrix)
 
         self.sorted_idx = np.argsort(self.vals)[::-1]  # indices ordenados por importancia das componentes
-        self.sorted_e_value = self.vals[self.sorted_idx]  # ordenar os valores pelos indices das colunas
-        self.sorted_e_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores pelos indices das colunas
+        self.sorted_value = self.vals[self.sorted_idx]  # ordenar os valores pelos indices das colunas
+        self.sorted_vectors = self.vecs[:, self.sorted_idx]  # ordenar os vetores pelos indices das colunas
 
         if self.n_components > 0:
             if self.n_components > dataset.X.shape[1]:
                 warnings.warn("The number of components is larger than the number of features.")
                 self.n_components = dataset.X.shape[1]
-            self.components_vector = self.sorted_e_vectors[:, 0:self.n_components]  # vetores correspondentes ao numero de componentes selecionados
+            self.components_vector = self.sorted_vectors[:, 0:self.n_components]  # vetores correspondentes ao numero de componentes selecionados
         else:
             warnings.warn("The number of components is lower than 0.")
             self.n_components = 1
-            self.components_vector = self.sorted_e_vectors[:, 0:self.n_components]
+            self.components_vector = self.sorted_vectors[:, 0:self.n_components]
 
         x_red = np.dot(self.components_vector.transpose(), features).transpose()
         return x_red
 
     def fit_transform(self, dataset):
         x_red = self.transform(dataset)
-        components_sum, components_values = self.explained_variances()
-        return x_red, components_sum, components_values
+        components_sum = self.explained_variances()
+        return x_red, components_sum
 
     def explained_variances(self):
-        self.components_values = self.sorted_e_value[0:self.n_components]
-        return np.sum(self.components_values), self.sorted_e_value
+        sum_val = np.sum(self.sorted_value)
+        ev = []
+        for value in self.sorted_value:
+            ev.append(value / sum_val * 100)
+        return np.array(ev)
 
 
 class KMeans:
