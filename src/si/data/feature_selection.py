@@ -63,7 +63,8 @@ class SelectKBest:
                           f"All {X.shape[1]} features will be selected")
             self.k = int(X.shape[1])
 
-        sel_feats = np.argsort(self.F_stat)[-self.k:]  # lista de features selecionadas
+        sel_feats = np.argsort(self.F_stat)[-self.k:]  # lista de features selecionadas ordenada pelo F_stat
+        # sel_feats = np.sort(sel_feats)  # caso queira apresentar as features pela ordem de aparecimento no dataset
 
         x = X[:, sel_feats]  # dados correspondentes as features selecionadas
         x_names = [Xnames[index] for index in sel_feats]
