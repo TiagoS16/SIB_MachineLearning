@@ -5,7 +5,7 @@ import pandas as pd
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'euclidean', 'manhattan']
+__all__ = ['label_gen', 'euclidean', 'manhattan', 'train_test_split']
 
 
 def label_gen(n):
@@ -32,6 +32,16 @@ def euclidean(x, y):
 
 
 def manhattan(x, y):
-    dist = np.abs(x - y)
-    dist = np.sum(dist)
+    dist = np.sum(np.abs(x - y))
     return dist
+
+
+def train_test_split(dataset, split=0.8):
+    size = dataset.X.shape[0]
+    idx_split = int(split * size)
+    arr = np.arange(size)
+    np.random.shuffle(arr)
+    from src.si.data.dataset import Dataset
+    train = Dataset(dataset.X[arr[:idx_split]], dataset.Y[arr[:idx_split]], dataset.xnames, dataset.yname)
+    test = Dataset(dataset.X[arr[idx_split:]], dataset.Y[arr[idx_split:]], dataset.xnames, dataset.yname)
+    return train, test

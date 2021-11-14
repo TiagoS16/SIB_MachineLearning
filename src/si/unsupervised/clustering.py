@@ -60,7 +60,7 @@ class PCA:
 
 
 class KMeans:
-    def __init__(self, k, distance="euclidean", n_iter=100):
+    def __init__(self, k, distance='euclidean', n_iter=100):  # todo verificar argumentos default (Enum - lista para selecionar a funçao)
         dist = ["euclidean", "manhattan"]
         self.k = k
         self.iter = n_iter
