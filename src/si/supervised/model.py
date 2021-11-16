@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
 
-class Modelo(ABC):
-    def __init__(self, n_neighbors=5):
+class Model(ABC):
+    def __init__(self):
         self.is_fitted = False
 
     @abstractmethod

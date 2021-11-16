@@ -1,9 +1,9 @@
-from src.si.supervised.model import Modelo
+from src.si.supervised.model import Model
 import numpy as np
 from src.si.util.util import euclidean
 from src.si.util.metrics import accuracy_score
 
-class KNN(Modelo):
+class KNN(Model):
     def __init__(self, n_neighbors=5, classification=True):
         super(KNN).__init__()
         self.k_neighbors = n_neighbors

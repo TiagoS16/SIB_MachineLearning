@@ -5,7 +5,7 @@ import pandas as pd
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'euclidean', 'manhattan', 'train_test_split']
+__all__ = ['label_gen', 'euclidean', 'manhattan', 'sigmoid', 'train_test_split']
 
 
 def label_gen(n):
@@ -34,6 +34,10 @@ def euclidean(x, y):
 def manhattan(x, y):
     dist = np.sum(np.abs(x - y))
     return dist
+
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
 
 def train_test_split(dataset, split=0.8):

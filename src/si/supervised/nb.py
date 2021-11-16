@@ -1,9 +1,9 @@
-from src.si.supervised.model import Modelo
+from src.si.supervised.model import Model
 from src.si.util.metrics import accuracy_score
 import numpy as np
 
 
-class Naive_bayes(Modelo):
+class Naive_bayes(Model):
     def __init__(self):
         super(Naive_bayes, self).__init__()
 
