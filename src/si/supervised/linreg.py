@@ -1,6 +1,8 @@
 from src.si.supervised.model import Model
 from ..util.metrics import mse
+from ..util.util import add_intersect
 import numpy as np
+
 
 class LinearRegression(Model):
 
@@ -42,9 +44,13 @@ class LinearRegression(Model):
         _x = np.hstack(([1], x))
         return np.dot(self.theta, _x)
 
-    def cost(self):
-        y_pred = np.dot(self.X, self.theta)
-        return mse(self.Y, y_pred) / 2
+    def cost(self, X=None, Y=None, theta=None):
+        X = add_intersect(X) if X is not None else self.X
+        Y = Y if Y is not None else self.Y
+        theta = theta if theta is not None else self.theta
+
+        y_pred = np.dot(X, theta)
+        return mse(Y, y_pred) / 2
 
 
 class LinearRegressionReg(LinearRegression):

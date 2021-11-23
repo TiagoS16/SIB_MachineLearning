@@ -5,6 +5,7 @@ from src.si.data.dataset import Dataset, summary
 from src.si.util.scale import StandardScaler
 from src.si.supervised.linreg import LinearRegression, LinearRegressionReg
 import numpy as np
+import pandas as pd
 import os
 
 
@@ -108,16 +109,41 @@ print('Custo:', logreg.cost())
 # Logistic Regression with L2 regularization
 print('\nLogistic Regression with L2 regularization')
 
-# logreg = LogisticRegressionReg()
-# logreg.fit(dataset)
-# print(logreg.theta)
-#
-# plt.scatter(dataset.X[:, 0], dataset.X[:, 1], c=dataset.Y)
-# _x = np.linspace(min(dataset.X[:, 0]), max(dataset.X[:, 0]), 2)
-# _y = [(-logreg.theta[0]-logreg.theta[1]*x)/logreg.theta[2] for x in _x]
-# plt.plot(_x, _y, '-', color='red')
-# plt.show()
-#
-# ex = np.array([5.5, 2])
-# print("Pred. example:", logreg.predict(ex))
-# print('Custo:', logreg.cost())
+logreg = LogisticRegressionReg()
+logreg.fit(dataset)
+print(logreg.theta)
+
+plt.scatter(dataset.X[:, 0], dataset.X[:, 1], c=dataset.Y)
+_x = np.linspace(min(dataset.X[:, 0]), max(dataset.X[:, 0]), 2)
+_y = [(-logreg.theta[0]-logreg.theta[1]*x)/logreg.theta[2] for x in _x]
+plt.plot(_x, _y, '-', color='red')
+plt.show()
+
+ex = np.array([5.5, 2])
+print("Pred. example:", logreg.predict(ex))
+print('Custo:', logreg.cost())
+
+
+# Cross Validation
+print('\nCross Validation')
+
+from src.si.util.cv import *
+
+filename = os.path.join(DIR, 'datasets/iris.data')
+df = pd.read_csv(filename)
+iris = Dataset.from_dataframe(df, ylabel="class")
+y = [int(x != 'Iris-setosa') for x in iris.Y]
+dataset = Dataset(iris.X[:, :2], np.array(y))
+
+logreg = LogisticRegression(epochs=1000)
+cv = CrossValidationScore(model=logreg, dataset=dataset)
+cv.run()
+print(cv.toDataframe())
+
+# Grid Search with CV
+print('\nGrid Search with CV')
+
+parameters = {'epochs': [100, 200, 400, 800, 1000], 'lr': [0, 0.2, 0.4, 0.8]}
+gs = GridSearchCV(logreg, dataset, parameters, cv=3, split=0.5)
+gs.run()
+print(gs.toDataframe())

@@ -5,7 +5,7 @@ import pandas as pd
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'euclidean', 'manhattan', 'sigmoid', 'train_test_split']
+__all__ = ['label_gen', 'euclidean', 'manhattan', 'sigmoid', 'train_test_split', 'add_intersect']
 
 
 def label_gen(n):
@@ -49,3 +49,7 @@ def train_test_split(dataset, split=0.8):
     train = Dataset(dataset.X[arr[:idx_split]], dataset.Y[arr[:idx_split]], dataset.xnames, dataset.yname)
     test = Dataset(dataset.X[arr[idx_split:]], dataset.Y[arr[idx_split:]], dataset.xnames, dataset.yname)
     return train, test
+
+
+def add_intersect(x):
+    return np.hstack((np.ones((x.shape[0], 1)), x))
