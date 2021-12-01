@@ -19,7 +19,6 @@ class KNN(Model):
         return idx_sort[:self.k_neighbors]
 
     def predict(self, x):
-        # todo ver outra forma de fazer isto
         assert self.is_fitted, 'Model must be fitted before prediction'
         neighbors = self.get_neighbors(x)
         values = self.dataset.Y[neighbors].tolist()
