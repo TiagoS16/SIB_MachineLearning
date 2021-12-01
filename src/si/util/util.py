@@ -53,3 +53,6 @@ def train_test_split(dataset, split=0.8):
 
 def add_intersect(x):
     return np.hstack((np.ones((x.shape[0], 1)), x))
+
+
+# TODO: fazer uma classe callable de confusion matrix
