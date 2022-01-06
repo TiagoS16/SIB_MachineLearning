@@ -41,8 +41,17 @@ class LinearRegression(Model):
 
     def predict(self, x):
         assert self.is_fitted, 'Model must be fitted before predicting'
-        _x = np.hstack(([1], x))
-        return np.dot(self.theta, _x)
+        x = np.array(x)
+        if x.ndim > 1:
+            res = []
+            for i in x:
+                _x = np.hstack(([1], i))
+                res.append(np.dot(self.theta, _x))
+        else:
+            _x = np.hstack(([1], x))
+            res = np.dot(self.theta, _x)
+        return res
+
 
     def cost(self, X=None, Y=None, theta=None):
         X = add_intersect(X) if X is not None else self.X

@@ -39,8 +39,16 @@ class LogisticRegression(Model):
         return sigmoid(np.dot(self.theta, _x))
 
     def predict(self, x):
-        p = self.probability(x)
-        res = 1 if p >= 0.5 else 0
+        x = np.array(x)
+        if x.ndim > 1:
+            res = []
+            for i in x:
+                p = self.probability(i)
+                pred = 1 if p >= 0.5 else 0
+                res.append(pred)
+        else:
+            p = self.probability(x)
+            res = 1 if p >= 0.5 else 0
         return res
 
     def cost(self, X=None, Y=None, theta=None):

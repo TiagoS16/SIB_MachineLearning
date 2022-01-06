@@ -55,17 +55,15 @@ def r2_score(y_true, y_pred):
 
 
 class ConfusionMatrix:
-    def __init__(self, true_y, pred_y):
-        self.true_y = np.array(true_y)
-        self.pred_y = np.array(pred_y)
-        self.conf = None
 
+    def __call__(self, true_y, pred_y):
+        self.true = np.array(true_y)
+        self.pred = np.array(pred_y)
+        return self.to_df()
 
     def calc(self):
-        self.conf = pd.crosstab(self.true_y, self.pred_y, rownames=['Actual'], colnames=['Predicted'], margins=True)
+        cm = pd.crosstab(self.true, self.pred, rownames=["Actual Values"], colnames=["Predicted Values"], margins=True)
+        return cm
 
-    def toDataframe(self):
-        return self.conf
-
-    def __call__(self):
-        self.calc()
+    def to_df(self):
+        return pd.DataFrame(self.calc())
