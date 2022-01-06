@@ -52,7 +52,6 @@ class LinearRegression(Model):
             res = np.dot(self.theta, _x)
         return res
 
-
     def cost(self, X=None, Y=None, theta=None):
         X = add_intersect(X) if X is not None else self.X
         Y = Y if Y is not None else self.Y

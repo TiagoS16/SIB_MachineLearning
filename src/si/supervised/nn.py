@@ -102,12 +102,8 @@ class NN(Model):
             self.history[epoch] = err
             if self.verbose:
                 print(f"epoch {epoch+1}/{self.epochs}, error= {err}")
-            # else:
-            #     print(f"epoch {epoch + 1}/{self.epochs}, error= {err}", end='\r')
-
-        if not self.verbose:
-            print(f"epoch {self.epochs}/{self.epochs}, error= {err}")
-        self.is_fitted = True
+            else:
+                print(f"epoch {epoch + 1}/{self.epochs}, error= {err}", end='\r')
 
     def fit_batch(self, dataset, batchsize=256):
         X, y = dataset.getXy()
@@ -136,11 +132,9 @@ class NN(Model):
             self.history[epoch] = np.average(self.history_batch)
             if self.verbose:
                 print(f'epoch {epoch + 1}/{self.epochs}, error = {self.history[epoch]}')
-            # else:
-            #     print(f"epoch {epoch + 1}/{self.epochs}, error = {self.history[epoch]}", end='\r')
+            else:
+                print(f"epoch {epoch + 1}/{self.epochs}, error = {self.history[epoch]}", end='\r')
         self.is_fitted = True
-        if not self.verbose:
-            print(f"epoch {self.epochs}/{self.epochs}, error= {self.history[self.epochs-1]}")
 
     def predict(self, x):
         assert self.is_fitted, "Model must be fitted before prediction"
