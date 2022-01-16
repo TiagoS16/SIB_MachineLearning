@@ -218,29 +218,90 @@ class Conv2D(Layer):
         return input_error
 
 
-class MaxPoling(Layer):
-    def __init__(self, region_shape):
-        self.region_h, self.region_w = region_shape
+class Pooling2D(Layer):
 
-    def forward(self, input_data):
-        self.X_input = input_data
-        _, self.input_h, self.input_w, self.input_f = input_data.shape
+    def __init__(self, size=2, stride=2):
+        self.size = size
+        self.stride = stride
 
-        self.out_h = self.input_h // self.region_h
-        self.out_w = self.input_w // self.region_w
-        output = np.zeros((self.out_h, self.out_w, self.input_f))
+    def pool(X_col):  # self?
+        raise NotImplementedError
 
-        for image, i, j in self.iterate_regions():
-            output[i, j] = np.amax(image)
-        return output
+    def dpool(dX_col, dout_col, pool_cache):  # self?
+        raise NotImplementedError
 
-    def backward(self, output_error, lr):
-        pass
+    def forward(self, input):
+        self.X_shape = input.shape
+        n, h, w, d = input.shape
+        h_out = (h - self.size) / self.stride + 1
+        w_out = (w - self.size) / self.stride + 1
 
-    def iterate_regions(self):
-        for i in range(self.out_h):
-            for j in range(self.out_w):
-                image = self.X_input[(i * self.region_h): (i * self.region_h + 2), (j * self.region_h):(j * self.region_h + 2)]
-                yield image, i, j
+        if not w_out.is_integer() or not h_out.is_integer():
+            raise Exception('Invalid output dimension')
+
+        h_out, w_out = int(h_out), int(w_out)
+
+        X_reshaped = input.reshape(n * d, h, w, 1)
+        # TODO: alguém que arranje a im2col
+        self.X_col = im2col(X_reshaped, self.size, self.size, pad=0, stride=self.stride)  # im2col está errada. A fun que o prof deu nao é a mesma que usou
+
+        out, self.max_idx = self.pool(self.X_col)
+
+        out = out.reshape(h_out, w_out, n, d)
+        out = out.transpose(3, 2, 0, 1)
+
+        return out
+
+    def backward(self, erro, learning_rate):
+        n, w, h, d = self.X_shape
+
+        dX_col = np.zeros_like(self.X_col)
+        dout_col = erro.transpose(1, 2, 3, 0).ravel()
+
+        dX = self.dpool(dX_col, dout_col, self.max_idx)
+        # TODO: alguém que arranje a col2im
+        dX = col2im(dX, (n * d, h, w, 1), self.size, self.size, pad=0, stride=self.stride)  # col2im está errada. A fun que o prof deu nao é a mesma que usou
+        dX = dX.reshape(self.X_shape)
+
+        return dX
+
+
+class MaxPooling2D(Pooling2D):
+
+    def pool(X_col):
+        max_idx = np.argmax(X_col, axis=0)
+        out = X_col[max_idx, range(max_idx.size)]
+        return out, max_idx
+
+    def dpool(dX_col, dout_col, pool_cache):
+        dX_col[pool_cache, range(dout_col.size)] = dout_col
+        return dX_col
+
+
+# class MaxPooling(Pooling2D):
+#
+#     def __init__(self, region_shape):
+#         self.region_h, self.region_w = region_shape
+#
+#     def forward(self, input_data):
+#         self.X_input = input_data
+#         _, self.input_h, self.input_w, self.input_f = input_data.shape
+#
+#         self.out_h = self.input_h // self.region_h
+#         self.out_w = self.input_w // self.region_w
+#         output = np.zeros((self.out_h, self.out_w, self.input_f))
+#
+#         for image, i, j in self.iterate_regions():
+#             output[i, j] = np.amax(image)
+#         return output
+#
+#     def backward(self, output_error, lr):
+#         pass
+#
+#     def iterate_regions(self):
+#         for i in range(self.out_h):
+#             for j in range(self.out_w):
+#                 image = self.X_input[(i * self.region_h): (i * self.region_h + 2), (j * self.region_h):(j * self.region_h + 2)]
+#                 yield image, i, j
 
 
