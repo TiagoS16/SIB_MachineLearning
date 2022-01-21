@@ -93,14 +93,21 @@ def _im2col_indices(X_shape, fr, fc, p, s):
     return k, i, j
 
 
-def im2col(X, W_shape, pad, stride):
+def im2col(X, W_shape, padding, stride):
     fr, fc, n_in, n_out = W_shape
-    s, p = stride, pad
     n_ex, in_rows, in_cols, n_in = X.shape
+    s = stride
+    pad = padding
+
+    if isinstance(pad, int):
+        pad = (pad, pad, pad, pad)
+
+    if isinstance(pad, tuple):
+        if len(pad) == 2:
+            pad = (pad[0], pad[0], pad[1], pad[1])
 
     # zero-pad the input
-    X_pad, p = pad2D(X, p, W_shape[:2], stride=s)
-    pr1, pr2, pc1, pc2 = p
+    X_pad, p = pad2D(X, pad, W_shape[:2], stride=s)
 
     # shuffle to have channels as the first dim
     X_pad = X_pad.transpose(0, 3, 1, 2)
@@ -113,8 +120,17 @@ def im2col(X, W_shape, pad, stride):
     return X_col, p
 
 
-def col2im(X_col, X_shape, W_shape, pad, stride):
+def col2im(X_col, X_shape, W_shape, padding, stride):
     s = stride
+    pad = padding
+
+    if isinstance(pad, int):
+        pad = (pad, pad, pad, pad)
+
+    if isinstance(pad, tuple):
+        if len(pad) == 2:
+            pad = (pad[0], pad[0], pad[1], pad[1])
+
     pr1, pr2, pc1, pc2 = pad
     fr, fc, n_in, n_out = W_shape
     n_ex, in_rows, in_cols, n_in = X_shape

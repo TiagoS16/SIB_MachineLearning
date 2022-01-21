@@ -51,6 +51,8 @@ class Dense(Layer):
         self.bias -= learning_rate * bias_error
         return input_error
 
+    def __str__(self):
+        return "Dense"
 
 class Activation(Layer):
 
@@ -69,7 +71,7 @@ class Activation(Layer):
 
 class NN(Model):
 
-    def __init__(self, epochs=1000, lr=0.01, verbose=True):
+    def __init__(self, epochs=1000, lr=0.1, verbose=True):
         super(NN, self).__init__()
         self.epochs = epochs
         self.lr = lr
@@ -78,6 +80,12 @@ class NN(Model):
         self.layers = []
         self.loss = mse
         self.loss_prime = mse_prime
+
+        self.is_fitted = False
+
+    def useLoss(self, loss, loss_prime):
+        self.loss = loss
+        self.loss_prime = loss_prime
 
     def add(self, layer):
         self.layers.append(layer)
@@ -104,6 +112,7 @@ class NN(Model):
                 print(f"epoch {epoch+1}/{self.epochs}, error= {err}")
             else:
                 print(f"epoch {epoch + 1}/{self.epochs}, error= {err}", end='\r')
+        self.is_fitted = True
 
     def fit_batch(self, dataset, batchsize=256):
         X, y = dataset.getXy()
@@ -172,7 +181,7 @@ class Conv2D(Layer):
         self.stride = stride
         self.padding = padding
         # weights
-        self.weights = np.random.rand(kernel_shape[0], kernel_shape[1], self.in_ch, self.out_ch) - 0.5
+        self.weights = (np.random.rand(kernel_shape[0], kernel_shape[1], self.in_ch, self.out_ch) - 0.5)
         # bias
         self.bias = np.zeros((self.out_ch, 1))
 
@@ -201,6 +210,7 @@ class Conv2D(Layer):
 
         fr, fc, in_ch, out_ch = self.weights.shape
         p = self.padding
+
         db = np.sum(erro, axis=(0, 1, 2))
         db = db.reshape(out_ch,)
 
@@ -210,29 +220,32 @@ class Conv2D(Layer):
 
         W_reshape = self.weights.reshape(out_ch, -1)
         dX_col = W_reshape.T @ dout_reshaped
-        input_error = col2im(dX_col, self.X_shape, self.weights.shape, (p, p, p, p), self.stride)
+        input_error = col2im(dX_col, self.X_shape, self.weights.shape, p, self.stride)
 
         self.weights -= learning_rate * dW
         self.bias -= learning_rate * db
 
         return input_error
 
+    def __str__(self):
+        return "Conv2D"
 
 class Pooling2D(Layer):
 
-    def __init__(self, size=2, stride=2):
+    def __init__(self, size=2, stride=1):
         self.size = size
         self.stride = stride
 
-    def pool(X_col):  # self?
+    def pool(self, X_col):
         raise NotImplementedError
 
-    def dpool(dX_col, dout_col, pool_cache):  # self?
+    def dpool(self, dX_col, dout_col, pool_cache):
         raise NotImplementedError
 
     def forward(self, input):
         self.X_shape = input.shape
         n, h, w, d = input.shape
+
         h_out = (h - self.size) / self.stride + 1
         w_out = (w - self.size) / self.stride + 1
 
@@ -241,14 +254,17 @@ class Pooling2D(Layer):
 
         h_out, w_out = int(h_out), int(w_out)
 
-        X_reshaped = input.reshape(n * d, h, w, 1)
-        # TODO: alguém que arranje a im2col
-        self.X_col = im2col(X_reshaped, self.size, self.size, pad=0, stride=self.stride)  # im2col está errada. A fun que o prof deu nao é a mesma que usou
+        X_transpose = input.transpose(0, 3, 1, 2)
+        X_reshaped = X_transpose.reshape(n * d, h, w, 1)
+
+        self.X_col, _ = im2col(X_reshaped, (self.size, self.size, d, d), padding=0, stride=self.stride)
 
         out, self.max_idx = self.pool(self.X_col)
 
-        out = out.reshape(h_out, w_out, n, d)
-        out = out.transpose(3, 2, 0, 1)
+        # out = out.reshape(h_out, w_out, n, d)
+        # out = out.transpose(2, 0, 1, 3)
+        out = out.reshape(d, h_out, w_out, n)
+        out = out.transpose(3, 1, 2, 0)
 
         return out
 
@@ -259,8 +275,7 @@ class Pooling2D(Layer):
         dout_col = erro.transpose(1, 2, 3, 0).ravel()
 
         dX = self.dpool(dX_col, dout_col, self.max_idx)
-        # TODO: alguém que arranje a col2im
-        dX = col2im(dX, (n * d, h, w, 1), self.size, self.size, pad=0, stride=self.stride)  # col2im está errada. A fun que o prof deu nao é a mesma que usou
+        dX = col2im(dX, (n * d, h, w, 1), (self.size, self.size, d, d), padding=0, stride=self.stride)
         dX = dX.reshape(self.X_shape)
 
         return dX
@@ -268,40 +283,18 @@ class Pooling2D(Layer):
 
 class MaxPooling2D(Pooling2D):
 
-    def pool(X_col):
+    def pool(self, X_col):
         max_idx = np.argmax(X_col, axis=0)
         out = X_col[max_idx, range(max_idx.size)]
         return out, max_idx
 
-    def dpool(dX_col, dout_col, pool_cache):
+    def dpool(self, dX_col, dout_col, pool_cache):
         dX_col[pool_cache, range(dout_col.size)] = dout_col
         return dX_col
 
+    def __str__(self):
+        return "MaxPooling2D"
 
-# class MaxPooling(Pooling2D):
-#
-#     def __init__(self, region_shape):
-#         self.region_h, self.region_w = region_shape
-#
-#     def forward(self, input_data):
-#         self.X_input = input_data
-#         _, self.input_h, self.input_w, self.input_f = input_data.shape
-#
-#         self.out_h = self.input_h // self.region_h
-#         self.out_w = self.input_w // self.region_w
-#         output = np.zeros((self.out_h, self.out_w, self.input_f))
-#
-#         for image, i, j in self.iterate_regions():
-#             output[i, j] = np.amax(image)
-#         return output
-#
-#     def backward(self, output_error, lr):
-#         pass
-#
-#     def iterate_regions(self):
-#         for i in range(self.out_h):
-#             for j in range(self.out_w):
-#                 image = self.X_input[(i * self.region_h): (i * self.region_h + 2), (j * self.region_h):(j * self.region_h + 2)]
-#                 yield image, i, j
+
 
 

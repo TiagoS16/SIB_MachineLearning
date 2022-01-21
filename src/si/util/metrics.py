@@ -28,11 +28,11 @@ def mse_prime(y_true, y_pred):
 
 
 def cross_entropy(y_true, y_pred):
-    return -(y_true * np.log(y_pred)).sum()
+    return -(y_true * np.log(y_pred)).sum() / y_true.size
 
 
 def cross_entropy_prime(y_true, y_pred):
-    return y_pred - y_true
+    return (y_pred - y_true) / y_true.size
 
 
 def r2_score(y_true, y_pred):
